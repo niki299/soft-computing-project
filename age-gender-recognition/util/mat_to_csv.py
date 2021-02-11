@@ -24,7 +24,7 @@ wiki_face_score2 = wiki[0][0][7][0]
 wiki_path = []
 
 for path in wiki_full_path:
-    wiki_path.append('wiki_crop/' + path[0])
+    wiki_path.append('../../wiki_crop/' + path[0])
 
 wiki_genders = []
 
