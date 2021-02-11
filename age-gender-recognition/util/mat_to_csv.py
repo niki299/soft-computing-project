@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 
 cols = ['age', 'gender', 'path', 'face_score1', 'face_score2']
 
-wiki_mat_path = '../../../wiki/wiki.mat'
+wiki_mat_path = '../../../wiki_crop/wiki.mat'
 
 wiki_data = loadmat(wiki_mat_path)
 
@@ -69,4 +69,4 @@ meta = meta.drop(['face_score1', 'face_score2'], axis=1)
 
 meta = meta.sample(frac=1)
 
-meta.to_csv('../../../wiki/meta.csv', index=False)
+meta.to_csv('../../../wiki_crop/meta.csv', index=False)
