@@ -36,7 +36,7 @@ def estimate(net, image):
 def create_model(width, height, kernels, hidden, classes):
     net = Sequential()
 
-    net.add(Conv2D(kernels, (5, 5), padding="same", input_shape=(height, width, 3)))
+    net.add(Conv2D(kernels, (3, 3), padding="same", input_shape=(height, width, 1)))
     net.add(Activation("relu"))
     net.add(BatchNormalization())
 
@@ -75,13 +75,15 @@ def training(model, train_path, validation_path):
         train_path,
         target_size=(128, 128),
         batch_size=128,
-        class_mode='categorical'
+        class_mode='categorical',
+        color_mode='grayscale'
     )
     validation_data = validation_data_gen.flow_from_directory(
         validation_path,
         target_size=(128, 128),
         batch_size=128,
-        class_mode='categorical'
+        class_mode='categorical',
+        color_mode = 'grayscale'
     )
 
     filepath = "weights.best.hdf5"
@@ -124,7 +126,7 @@ def predict_age(img):
     return "["+str(ageranges[age_group])+"-"+str(ageranges[age_group+1]-1)+"]"
 
 if __name__ == '__main__':
-    train = True
+    train = False
     classes = 10
     kernels = 16
     hidden = 256
