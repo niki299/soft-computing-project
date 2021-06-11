@@ -1,3 +1,4 @@
+
 from keras.callbacks import ModelCheckpoint
 from keras_preprocessing.image import ImageDataGenerator
 
@@ -10,6 +11,26 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers.core import Dropout
 from keras.layers.core import Flatten
 from keras.layers.core import Dense
+
+from age.age_data import resize_image, image2gray
+import sys
+
+import numpy as np
+from keras.preprocessing.image import img_to_array
+
+def estimate(net, image):
+
+    array = img_to_array(image, data_format="channels_last")
+
+    arrays = []
+    arrays.append(array)
+    data = np.array(arrays).astype("float") / 255.0
+
+    prob = net.predict(data)
+    classes = prob.argmax(axis=1)
+    class_num = classes[0]
+
+    return class_num
 
 
 def create_model(width, height, kernels, hidden, classes):
@@ -76,6 +97,31 @@ def training(model, train_path, validation_path):
     )
 
     return model
+
+def predict_age(img):
+
+    classes = 10
+    kernels = 16
+    hidden = 256
+    imgsize = 128
+
+    img = resize_image(img)
+    # img = image2gray(img)
+
+    net = create_model(imgsize, imgsize, kernels, hidden, classes)
+    opt = SGD(lr=0.01)
+    net.compile(loss="categorical_crossentropy",
+                optimizer=opt,
+                metrics=["accuracy"])
+
+    net.load_weights('../../age/weights.best.hdf5')
+    net.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    age_group = estimate(net, img)
+
+    ageranges = [1, 6, 11, 16, 19, 22, 31, 45, 61, 81, 101]
+
+    return "["+str(ageranges[age_group])+"-"+str(ageranges[age_group+1]-1)+"]"
 
 if __name__ == '__main__':
     train = True
