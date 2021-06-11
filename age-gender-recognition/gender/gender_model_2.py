@@ -11,6 +11,10 @@ from keras.layers.core import Dropout
 from keras.layers.core import Flatten
 from keras.layers.core import Dense
 
+from gender.gender_data import resize_image, image2gray
+from keras.preprocessing.image import img_to_array
+import numpy as np
+
 
 def create_model(width, height, kernels, hidden, classes):
     net = Sequential()
@@ -44,6 +48,46 @@ def create_model(width, height, kernels, hidden, classes):
     net.add(Dense(classes))
     net.add(Activation("softmax"))
     return net
+
+def estimate(net, image):
+
+    array = img_to_array(image, data_format="channels_last")
+
+    arrays = []
+    arrays.append(array)
+    data = np.array(arrays).astype("float") / 255.0
+
+    prob = net.predict(data)
+    classes = prob.argmax(axis=1)
+    class_num = classes[0]
+
+    return class_num
+
+def predict_gender(img):
+
+    classes = 10
+    kernels = 16
+    hidden = 256
+    imgsize = 128
+
+    img = resize_image(img)
+    # img = image2gray(img)
+
+    net = create_model(imgsize, imgsize, kernels, hidden, classes)
+    opt = SGD(lr=0.01)
+    net.compile(loss="categorical_crossentropy",
+                optimizer=opt,
+                metrics=["accuracy"])
+
+    net.load_weights('../../gender/weights.best.hdf5')
+    net.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    gender_group = estimate(net, img)
+
+    gender = ["F", "M"]
+
+    return gender[gender_group]
+
 
 def training(model, train_path, validation_path):
 
