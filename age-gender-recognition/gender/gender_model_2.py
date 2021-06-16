@@ -71,7 +71,7 @@ def predict_gender(img):
     imgsize = 128
 
     img = resize_image(img)
-    # img = image2gray(img)
+    img = image2gray(img)
 
     net = create_model(imgsize, imgsize, kernels, hidden, classes)
     opt = SGD(lr=0.01)
