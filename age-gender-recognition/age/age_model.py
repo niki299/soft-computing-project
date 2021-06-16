@@ -28,6 +28,7 @@ def estimate(net, image):
 
     prob = net.predict(data)
     classes = prob.argmax(axis=1)
+    print(prob.max(axis=1))
     class_num = classes[0]
 
     return class_num

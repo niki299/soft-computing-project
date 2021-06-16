@@ -347,8 +347,14 @@ def detect_webcam(yolo):
     if not vid.isOpened():
         raise IOError("Couldn't open webcam")
 
-    sample_rate = 20
+    sample_rate = 0
     frame_num = sample_rate
+
+    age_pred = []
+    gender_pred = []
+    out_pred = []
+
+    prev_len = 0
 
     while vid.isOpened():
         return_value, frame = vid.read()
@@ -356,26 +362,19 @@ def detect_webcam(yolo):
             break
         image = Image.fromarray(frame)
 
-        if frame_num == sample_rate:
-            age_pred = []
-            gender_pred = []
-
+        if(frame_num == sample_rate):
             out_pred, some_image = yolo.detect_image(image.copy(), show_stats=False)
-            np_image = np.array(image)
-
-            for prediction in out_pred:
-                left, top, right, bottom, c, score = prediction
-                face = np_image[top:bottom, left:right]
-
-                # face_pil = Image.fromarray(face)
-                # face_pil.show()
-
-                age_pred.append(predict_age(face))
-                gender_pred.append(predict_gender(face))
-
+            #out_pred = intersection(out_pred)
+            out_pred = sort_pred(out_pred)
             frame_num = 0
         else:
             frame_num += 1
+
+        if(prev_len != len(out_pred)):
+            np_image = np.array(image)
+            age_pred, gender_pred = predict_age_gender(out_pred, np_image)
+            prev_len = len(out_pred)
+            if(frame_num == sample_rate): frame_num = 0
 
         display_image = draw_rectangle(out_pred, age_pred, gender_pred, image.copy())
 
@@ -387,3 +386,59 @@ def detect_webcam(yolo):
             break
     vid.release()
     yolo.close_session()
+
+def sort_pred(predictions):
+
+    cup = []
+    for i in range(0, len(predictions) - 1):
+        for j in range(1, len(predictions)):
+            if(predictions[i][0] > predictions[j][0]):
+                cup = predictions[i]
+                predictions[i] = predictions[j]
+                predictions[j] = cup
+
+    return predictions
+
+
+def predict_age_gender(preditions, np_image):
+    age_pred = []
+    gender_pred = []
+
+    for prediction in preditions:
+        left, top, right, bottom, c, score = prediction
+        face = np_image[top:bottom, left:right]
+
+        # face_pil = Image.fromarray(face)
+        # face_pil.show()
+
+        age_pred.append(predict_age(face))
+        gender_pred.append(predict_gender(face))
+
+    return age_pred, gender_pred
+
+
+def intersection(predictions):
+
+    indexes = []
+    retList = []
+
+    for i in range(0, len(predictions) - 1):
+        for j in range(i + 1, len(predictions)):
+
+            if predictions[j][0] < predictions[i][0] < predictions[j][2]:
+                indexes.append(j)
+            elif predictions[j][0] < predictions[i][2] < predictions[j][2]:
+                indexes.append(j)
+            elif predictions[i][0] < predictions[j][0] and predictions[j][2] < predictions[i][2]:
+                indexes.append(j)
+
+            elif predictions[j][1] < predictions[i][1] < predictions[j][3]:
+                indexes.append(j)
+            elif predictions[j][1] < predictions[i][3] < predictions[j][3]:
+                indexes.append(j)
+
+    for i in range(0, len(predictions)):
+        if i not in indexes:
+            retList.append(predictions[i])
+
+    return retList

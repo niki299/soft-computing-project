@@ -31,17 +31,17 @@ def GetFileList(dirName, endings=[".jpg", ".jpeg", ".png", ".mp4"]):
     return allFiles
 
 
-def ChangeToOtherMachine(filelist, repo="TrainYourOwnYOLO", remote_machine=""):
+def ChangeToOtherMachine(filelist, repo="face_detection", remote_machine=""):
     """
     Takes a list of file_names located in a repo and changes it to the local machines file names. File must be executed from withing the repository
 
     Example:
 
-    '/home/ubuntu/TrainYourOwnYOLO/Data/Street_View_Images/vulnerable/test.jpg'
+    '/home/ubuntu/face_detection/Data/Street_View_Images/vulnerable/test.jpg'
 
     Get's converted to
 
-    'C:/Users/Anton/TrainYourOwnYOLO/Data/Street_View_Images/vulnerable/test.jpg'
+    'C:/Users/Anton/face_detection/Data/Street_View_Images/vulnerable/test.jpg'
 
     """
     filelist = [x.replace("\\", "/") for x in filelist]

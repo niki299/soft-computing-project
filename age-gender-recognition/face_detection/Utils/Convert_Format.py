@@ -4,7 +4,7 @@ import numpy as np
 import re
 import os
 from PIL import Image
-from TrainYourOwnYOLO.Utils.Get_File_Paths import GetFileList, ChangeToOtherMachine
+from face_detection.Utils.Get_File_Paths import GetFileList, ChangeToOtherMachine
 
 
 def convert_vott_csv_to_yolo(
